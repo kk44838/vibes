@@ -149,10 +149,18 @@ module.exports = {
 
                     if (isPlaylistURL(message)) {
                         console.log("is playlist url")
-                        query = {
-                            "listId": message.split('=')[1]
-                        };
-                        // query = message.split('=')[1];
+                        // query = {
+                        //     "listId": 
+                        // };
+
+                        const list = await ytSearch( { "listId": message.split('=')[1] } );
+
+                        console.log( 'playlist title: ' + list.title );
+                        list.videos.forEach( function ( video ) {
+                            console.log( video.title )
+                        } );
+                        
+
                     } else {
 
                         if (isSingleVideoURL(message)) {
@@ -169,9 +177,6 @@ module.exports = {
                         song = await findVideo(query, interaction)
                         console.log(song)
                     }
-                    
-
-
                     
                     if (!serverQueue) {
                         return createContract(interaction, channel, song)
