@@ -123,7 +123,7 @@ async function findVideo(query, interaction) {
     if (video){
 
         console.log({ title: video.title, url: video.url })
-        return { title: video.title, url: video.url }
+        return { title: video.title, url: video.url, duration: video.duration.timestamp }
         
     } else {
         console.log("Error finding video")
@@ -160,7 +160,7 @@ module.exports = {
                             console.log( video )
                             console.log("ALEFGASDFHLSADJFIOS")
                             console.log({ title: video.title, url: idToURL(video.videoId) })
-                            songs.push({ title: video.title, url: idToURL(video.videoId) })
+                            songs.push({ title: video.title, url: idToURL(video.videoId), duration: video.duration.timestamp })
 
                         } );
                         
