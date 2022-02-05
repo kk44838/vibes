@@ -13,11 +13,6 @@ const ytSearch = require('yt-search');
 
 const queue = new Map()
 
-const audioPlayer = createAudioPlayer({
-	behaviors: {
-		noSubscriber: NoSubscriberBehavior.Pause,
-	},
-});
 
 async function connectToChannel(channel) {
 	const connection = joinVoiceChannel({
@@ -49,13 +44,26 @@ async function createContract(interaction, voiceChannel, song) {
     queue.set(interaction.guild.id, queueContruct);
     // Pushing the song to our songs array
     queueContruct.songs.push(song);
+
     
+
     try {
         // Here we try to join the voicechat and save our connection into our object.
         const connection = await connectToChannel(voiceChannel);
         queueContruct.connection = connection;
         // Calling the play function to start a song
-        await play_song(interaction, queueContruct.songs[0], connection);
+        const audioPlayer = createAudioPlayer({
+            behaviors: {
+                noSubscriber: NoSubscriberBehavior.Pause,
+            },
+        });
+        
+        audioPlayer.on(AudioPlayerStatus.Idle, () => {
+            queueContruct.songs.shift();
+            play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
+        });
+        
+        await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
     } catch (err) {
         // Printing the error message if the bot fails to join the voicechat
         console.log(err);
@@ -64,7 +72,7 @@ async function createContract(interaction, voiceChannel, song) {
     }
 }
 
-const play_song = async (interaction, song, connection) => {
+const play_song = async (interaction, song, connection, audioPlayer) => {
     const song_queue = queue.get(interaction.guild.id);
 
     //If no song is left in the server queue. Leave the voice channel and delete the key and value pair from the global queue.
@@ -87,20 +95,6 @@ const play_song = async (interaction, song, connection) => {
     audioPlayer.play(resource)
 
     connection.subscribe(audioPlayer)
-
-    // const stream = ytdl(song.url, { filter: 'audioonly' });
-
-    // console.log(stream)
-
-    // const resource = createAudioResource(stream, {
-    //     metadata: song,
-    // });
-
-    // resource.playStream.on('error', error => {
-    //     console.error('Error:', error.message, 'with track', resource.metadata.title);
-    // });
-    
-    // audioPlayer.play(resource);
 
     await interaction.editReply(`🎶 Now playing **${song.title}**`)
 }
@@ -179,7 +173,7 @@ module.exports = {
                     } else {
                         serverQueue.songs.push(song);
                         console.log(serverQueue.songs);
-                        return interaction.reply(`${song.title} has been added to the queue!`);
+                        return interaction.editReply(`${song.title} has been added to the queue!`);
                     }
                     
                 } catch (error) {
