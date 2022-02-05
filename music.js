@@ -13,6 +13,10 @@ const ytSearch = require('yt-search');
 
 const queue = new Map()
 
+function idToURL(videoId) {
+    return 'https://www.youtube.com/watch?v=' + videoId;
+}
+
 
 async function connectToChannel(channel) {
 	const connection = joinVoiceChannel({
@@ -30,22 +34,20 @@ async function connectToChannel(channel) {
 	}
 }
 
-async function createContract(interaction, voiceChannel, song) {
+async function createContract(interaction, voiceChannel, songs) {
     // Creating the contract for our queue
     const queueContruct = {
         textChannel: interaction.channel,
         voiceChannel: voiceChannel,
         connection: null,
-        songs: [],
+        songs: songs,
         volume: 5,
         playing: true,
     };
     // Setting the queue using our contract
     queue.set(interaction.guild.id, queueContruct);
-    // Pushing the song to our songs array
-    queueContruct.songs.push(song);
-
-    
+    console.log(songs)
+    console.log(songs[0])
 
     try {
         // Here we try to join the voicechat and save our connection into our object.
@@ -62,6 +64,9 @@ async function createContract(interaction, voiceChannel, song) {
             queueContruct.songs.shift();
             play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
         });
+
+        console.log(queueContruct.songs[0])
+
         
         await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
     } catch (err) {
@@ -117,6 +122,7 @@ async function findVideo(query, interaction) {
     const video = await video_finder(query);
     if (video){
 
+        console.log({ title: video.title, url: video.url })
         return { title: video.title, url: video.url }
         
     } else {
@@ -139,7 +145,7 @@ module.exports = {
                     console.log(message)
                     // const args = message.split(" ");
                     // console.log(args)
-                    let song = {};
+                    const songs = []
 
                     if (isPlaylistURL(message)) {
                         console.log("is playlist url")
@@ -151,7 +157,11 @@ module.exports = {
 
                         console.log( 'playlist title: ' + list.title );
                         list.videos.forEach( function ( video ) {
-                            console.log( video.title )
+                            console.log( video )
+                            console.log("ALEFGASDFHLSADJFIOS")
+                            console.log({ title: video.title, url: idToURL(video.videoId) })
+                            songs.push({ title: video.title, url: idToURL(video.videoId) })
+
                         } );
                         
 
@@ -168,15 +178,16 @@ module.exports = {
                             query = message
                         }
 
-                        song = await findVideo(query, interaction)
+                        const song = await findVideo(query, interaction)
                         console.log(song)
+                        songs.push(song)
                     }
                     
                     if (!serverQueue) {
-                        return createContract(interaction, channel, song)
+                        return createContract(interaction, channel, songs)
 
                     } else {
-                        serverQueue.songs.push(song);
+                        serverQueue.songs.concat(songs);
                         console.log(serverQueue.songs);
                         return interaction.editReply(`${song.title} has been added to the queue!`);
                     }
