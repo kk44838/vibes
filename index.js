@@ -3,8 +3,7 @@ const { Client, Collection, Intents } = require('discord.js');
 const { token } = require('./config.json');
 const { MongoClient } = require('mongodb');
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
-
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, , Intents.FLAGS.GUILD_VOICE_STATES] });
 
 
 // Command Handling
@@ -71,6 +70,8 @@ async function run() {
   }
 run().catch(console.dir);
 
+
+
+
 // Login to Discord with your client's token
 client.login(token);
-
