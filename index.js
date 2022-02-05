@@ -1,6 +1,7 @@
 const fs = require('fs');
 const { Client, Collection, Intents } = require('discord.js');
 const { token } = require('./config.json');
+const { MongoClient } = require('mongodb');
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
 
@@ -47,6 +48,28 @@ for (const file of eventFiles) {
     }
 }
 
+const uri = "mongodb://localhost:27017/";
+// Connect to the db
+const mongoDBClient = new MongoClient(uri)
+
+console.log('trying to connect to MongoDB')
+
+async function run() {
+    try {
+      await mongoDBClient.connect();
+      console.log("connected")
+      const database = mongoDBClient.db('vibes');
+      const deadlines = database.collection('deadlines');
+      // Query for a movie that has the title 'Back to the Future'
+      const query = { title: 'Back to the Future' };
+      const allDeadlines = await deadlines.find({}).toArray();
+      console.log(allDeadlines);
+    } finally {
+      // Ensures that the client will close when you finish/error
+      await mongoDBClient.close();
+    }
+  }
+run().catch(console.dir);
 
 // Login to Discord with your client's token
 client.login(token);
