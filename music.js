@@ -55,7 +55,7 @@ async function createContract(interaction, voiceChannel, song) {
         const connection = await connectToChannel(voiceChannel);
         queueContruct.connection = connection;
         // Calling the play function to start a song
-        play_song(interaction, queueContruct.songs[0], connection);
+        await play_song(interaction, queueContruct.songs[0], connection);
     } catch (err) {
         // Printing the error message if the bot fails to join the voicechat
         console.log(err);
