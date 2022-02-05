@@ -8,8 +8,12 @@ module.exports = {
         .addStringOption(option => option.setName('url').setDescription('Enter Youtube Song URL')),
 	async execute(interaction) {
         const songName = interaction.options.getString('url');
+		console.log(interaction.options)
+		console.log(songName)
         const serverQueue = music.queue.get(interaction.guild.id);
 
+		await interaction.deferReply();
         await music.play(interaction, songName, serverQueue);
+		
 	},
 };

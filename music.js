@@ -102,9 +102,35 @@ const play_song = async (interaction, song, connection) => {
     
     // audioPlayer.play(resource);
 
-    await interaction.reply(`🎶 Now playing **${song.title}**`)
+    await interaction.editReply(`🎶 Now playing **${song.title}**`)
 }
 
+
+function isSingleVideoURL(str) {
+    return str.includes('watch?v=');
+}
+
+function isPlaylistURL(str) {
+    return str.includes('playlist?list=');
+}
+
+async function findVideo(query, interaction) {
+    const video_finder = async (query) =>{
+        const video_result = await ytSearch(query);
+        return (video_result.videos.length > 1) ? video_result.videos[0] : null;
+    }
+
+    const video = await video_finder(query);
+    if (video){
+
+        return { title: video.title, url: video.url }
+        
+    } else {
+        console.log("Error finding video")
+        interaction.reply('Error finding video.');
+        throw new Error
+    }
+}
 
 module.exports = {
     queue: queue,
@@ -121,23 +147,31 @@ module.exports = {
                     // console.log(args)
                     let song = {};
 
-                    if (ytdl.validateURL(message)) {
-
+                    if (isPlaylistURL(message)) {
+                        console.log("is playlist url")
+                        query = {
+                            "listId": message.split('=')[1]
+                        };
+                        // query = message.split('=')[1];
                     } else {
-                        const video_finder = async (query) =>{
-                            const video_result = await ytSearch(query);
-                            return (video_result.videos.length > 1) ? video_result.videos[0] : null;
-                        }
-        
-                        const video = await video_finder(message);
-                        if (video){
-                            song = { title: video.title, url: video.url }
-                            console.log(song)
+
+                        if (isSingleVideoURL(message)) {
+                            console.log("video url")
+                            query = {
+                                "videoId": message.split('=')[1]
+                            };
+                            query = message.split('=')[1];
                         } else {
-                            return interaction.reply('Error finding video.');
+                            console.log("word search")
+                            query = message
                         }
 
+                        song = await findVideo(query, interaction)
+                        console.log(song)
                     }
+                    
+
+
                     
                     if (!serverQueue) {
                         return createContract(interaction, channel, song)
