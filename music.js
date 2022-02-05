@@ -134,7 +134,19 @@ async function findVideo(query, interaction) {
 
 module.exports = {
     queue: queue,
+    async stop(interaction) {
+        const channel = interaction.member?.voice.channel;
+        if (channel) {
+            const song_queue = queue.get(interaction.guild.id);
 
+            song_queue.connection.destroy();
+            queue.delete(interaction.guild.id)
+            interaction.reply('**Music Stopped!**');
+
+        } else {
+            interaction.reply('Join a voice channel then try again!');
+        }
+    },
 	async play(interaction, message, serverQueue) {
         const channel = interaction.member?.voice.channel;
 

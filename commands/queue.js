@@ -21,6 +21,8 @@ module.exports = {
 	async execute(interaction) {
         const serverQueue = music.queue.get(interaction.guild.id);
         // console.log(serverQueue.songs)
+        if (!serverQueue || !serverQueue.songs)
+            return await interaction.reply("**Empty Queue**")
 
 		await interaction.reply(songsToString(serverQueue.songs))
 		
