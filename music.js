@@ -43,6 +43,7 @@ async function createContract(interaction, voiceChannel, songs) {
         songs: songs,
         volume: 5,
         playing: true,
+        audioPlayer: null,
     };
     // Setting the queue using our contract
     queue.set(interaction.guild.id, queueContruct);
@@ -60,6 +61,8 @@ async function createContract(interaction, voiceChannel, songs) {
             },
         });
         
+        queueContruct.audioPlayer = audioPlayer
+
         audioPlayer.on(AudioPlayerStatus.Idle, () => {
             queueContruct.songs.shift();
             play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
@@ -82,9 +85,10 @@ const play_song = async (interaction, song, connection, audioPlayer) => {
 
     //If no song is left in the server queue. Leave the voice channel and delete the key and value pair from the global queue.
     if (!song) {
-        song_queue.voiceChannel.leave();
-        queue.delete(interaction.guild.id);
-        return;
+        song_queue.connection.destroy();
+        queue.delete(interaction.guild.id)
+        
+        return interaction.reply('**Music Stopped!**');
     }
 
 
@@ -134,6 +138,22 @@ async function findVideo(query, interaction) {
 
 module.exports = {
     queue: queue,
+    async skip(interaction) {
+        const channel = interaction.member?.voice.channel;
+        if (channel) {
+            const song_queue = queue.get(interaction.guild.id);
+            
+            if (song_queue) {
+                song_queue.songs.shift();
+                play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
+            } else {
+                interaction.reply('**Nothing to Skip.**');
+            }
+
+        } else {
+            interaction.reply('Join a voice channel then try again!');
+        }
+    },
     async stop(interaction) {
         const channel = interaction.member?.voice.channel;
         if (channel) {
