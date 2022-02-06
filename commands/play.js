@@ -13,7 +13,9 @@ module.exports = {
         const serverQueue = music.queue.get(interaction.guild.id);
 
 		await interaction.deferReply();
-        await music.play(interaction, songName, serverQueue);
-		
+        msg = await music.play(interaction, songName, serverQueue);
+		console.log(msg)
+		interaction.editReply(msg.msg)
+
 	},
 };

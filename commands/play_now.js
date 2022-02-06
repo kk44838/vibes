@@ -3,17 +3,24 @@ const music = require("../music.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('play_next')
-		.setDescription('Plays music after current song!')
+		.setName('play_now')
+		.setDescription('Plays music now!')
         .addStringOption(option => option.setName('url').setDescription('Enter Youtube Song URL')),
 	async execute(interaction) {
-        const songName = interaction.options.getString('url');
-		console.log(interaction.options)
-		console.log(songName)
         const serverQueue = music.queue.get(interaction.guild.id);
+        const songName = interaction.options.getString('url');
 
 		await interaction.deferReply();
+
+		queueIsEmpty = serverQueue === undefined || serverQueue.songs.length == 0;
+
         msg =  await music.play_next(interaction, songName, serverQueue);
-		interaction.editReply(msg.msg)
+
+		if (!queueIsEmpty) {
+			await music.skip(interaction);
+		}
+		
+		interaction.editReply(msg.msg);
+
 	},
 };

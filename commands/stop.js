@@ -8,7 +8,8 @@ module.exports = {
 	async execute(interaction) {
 
 		await interaction.deferReply();
-        await music.stop(interaction);
+        msg = await music.stop(interaction);
+		interaction.editReply(msg.msg)
 		
 	},
 };

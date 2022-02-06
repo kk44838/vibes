@@ -10,6 +10,8 @@ module.exports = {
         const serverQueue = music.queue.get(interaction.guild.id);
 		await interaction.deferReply();
         await music.play_next(interaction, "IX51UAJUhhQ", serverQueue);
-		await music.skip()
+		await music.skip(interaction);
+		interaction.editReply("SIUUUUUUUUU");
+
 	},
 };

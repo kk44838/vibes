@@ -72,7 +72,7 @@ async function createContract(interaction, voiceChannel, songs) {
         console.log(queueContruct.songs[0])
 
         
-        await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
+        return await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
     } catch (err) {
         // Printing the error message if the bot fails to join the voicechat
         console.log(err);
@@ -89,7 +89,8 @@ const play_song = async (interaction, song, connection, audioPlayer) => {
         song_queue.connection.destroy();
         queue.delete(interaction.guild.id)
         
-        return interaction.reply('**Music Stopped!**');
+        // return interaction.reply('**Music Stopped!**');
+        return { "msg": '**Music Stopped!**' };
     }
 
 
@@ -106,7 +107,9 @@ const play_song = async (interaction, song, connection, audioPlayer) => {
 
     connection.subscribe(audioPlayer)
 
-    await interaction.editReply(`🎶 Now playing **${song.title}**`)
+    // await interaction.editReply(`🎶 Now playing **${song.title}**`)
+    return { "msg": `🎶 Now playing **${song.title}**` };
+
 }
 
 
@@ -191,13 +194,15 @@ module.exports = {
 
             if (song_queue) {
                 song_queue.songs.shift();
-                play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
+                return play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
             } else {
-                interaction.editReply('**Nothing to Skip.**');
+                // interaction.editReply('**Nothing to Skip.**');
+                return { "msg": '**Nothing to Skip.**'}
             }
 
         } else {
-            interaction.editReply('Join a voice channel then try again!');
+            // interaction.editReply('Join a voice channel then try again!');
+            return { "msg": 'Join a voice channel then try again!'}
         }
     },
     async stop(interaction) {
@@ -207,10 +212,14 @@ module.exports = {
 
             song_queue.connection.destroy();
             queue.delete(interaction.guild.id)
-            interaction.editReply('**Music Stopped!**');
+            // interaction.editReply('**Music Stopped!**');
+            return { "msg": '**Music Stopped!**'}
+
 
         } else {
-            interaction.editReply('Join a voice channel then try again!');
+            // interaction.editReply('Join a voice channel then try again!');
+            return { "msg": 'Join a voice channel then try again!'}
+
         }
     },
 
@@ -234,14 +243,17 @@ module.exports = {
                     serverQueue.songs.unshift(head);
                     console.log("PLAYNEXT___________________________");
                     console.log(serverQueue.songs);
-                    return interaction.editReply(`${songs[0].title} has been added to the front of the queue!`);
+                    // return interaction.editReply(`${songs[0].title} has been added to the front of the queue!`);
+                    return { "msg": `${songs[0].title} has been added to the front of the queue!` }
                 }
                 
             } catch (error) {
                 console.error(error);
             }
         } else {
-            interaction.editReply('Join a voice channel then try again!');
+            // interaction.editReply('Join a voice channel then try again!');
+
+            return { "msg": 'Join a voice channel then try again!'}
         }
 
     },
@@ -249,25 +261,28 @@ module.exports = {
         const channel = interaction.member?.voice.channel;
 
         if (channel) {
-                try {
-                    const songs = await getSongs(interaction, message);
+            try {
+                const songs = await getSongs(interaction, message);
 
-                    if (!serverQueue) {
-                        return createContract(interaction, channel, songs)
+                if (!serverQueue) {
+                    return createContract(interaction, channel, songs)
 
-                    } else {
-                        serverQueue.songs.concat(songs);
-                        console.log(serverQueue.songs);
-                        return interaction.editReply(`${songs[0].title} has been added to the queue!`);
-                    }
+                } else {
+                    serverQueue.songs.concat(songs);
+                    console.log(serverQueue.songs);
+                    // return interaction.editReply(`${songs[0].title} has been added to the queue!`);
                     
-                } catch (error) {
-                    console.error(error);
+                    return { "msg": `${songs[0].title} has been added to the front of the queue!` }
                 }
-            } else {
-                interaction.editReply('Join a voice channel then try again!');
+                
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            // interaction.editReply('Join a voice channel then try again!');
+
+            return { "msg": 'Join a voice channel then try again!'}
         }
         
-        // return await interaction.reply(message); 
 	},
 };
