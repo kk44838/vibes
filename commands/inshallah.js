@@ -9,6 +9,7 @@ module.exports = {
         const songName = "Inshallah Siuu"
         const serverQueue = music.queue.get(interaction.guild.id);
 		await interaction.deferReply();
-        await music.play(interaction, "IX51UAJUhhQ", serverQueue);
+        await music.play_next(interaction, "IX51UAJUhhQ", serverQueue);
+		await music.skip()
 	},
 };

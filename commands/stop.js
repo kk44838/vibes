@@ -7,7 +7,7 @@ module.exports = {
 		.setDescription('Stops music!'),
 	async execute(interaction) {
 
-		// await interaction.deferReply();
+		await interaction.deferReply();
         await music.stop(interaction);
 		
 	},

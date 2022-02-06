@@ -10,6 +10,7 @@ const { joinVoiceChannel, entersState,
 const ytdl = require('ytdl-core');
 const play = require('play-dl');
 const ytSearch = require('yt-search');
+// const play_next = require('./commands/play_next');
 
 const queue = new Map()
 
@@ -131,10 +132,55 @@ async function findVideo(query, interaction) {
         
     } else {
         console.log("Error finding video")
-        interaction.reply('Error finding video.');
+        interaction.editReply('Error finding video.');
         throw new Error
     }
 }
+
+async function getSongs(interaction, message) {
+    console.log(message)
+
+    const songs = []
+
+    if (isPlaylistURL(message)) {
+        console.log("is playlist url")
+        // query = {
+        //     "listId": 
+        // };
+
+        const list = await ytSearch( { "listId": message.split('=')[1] } );
+
+        console.log( 'playlist title: ' + list.title );
+        list.videos.forEach( function ( video ) {
+            console.log( video )
+            console.log("ALEFGASDFHLSADJFIOS")
+            console.log({ title: video.title, url: idToURL(video.videoId) })
+            songs.push({ title: video.title, url: idToURL(video.videoId), duration: video.duration.timestamp })
+
+        } );
+        
+
+    } else {
+
+        if (isSingleVideoURL(message)) {
+            console.log("video url")
+            query = {
+                "videoId": message.split('=')[1]
+            };
+            query = message.split('=')[1];
+        } else {
+            console.log("word search")
+            query = message
+        }
+
+        const song = await findVideo(query, interaction)
+        console.log(song)
+        songs.push(song)
+    }
+    return songs
+}
+
+
 
 module.exports = {
     queue: queue,
@@ -142,16 +188,16 @@ module.exports = {
         const channel = interaction.member?.voice.channel;
         if (channel) {
             const song_queue = queue.get(interaction.guild.id);
-            
+
             if (song_queue) {
                 song_queue.songs.shift();
                 play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
             } else {
-                interaction.reply('**Nothing to Skip.**');
+                interaction.editReply('**Nothing to Skip.**');
             }
 
         } else {
-            interaction.reply('Join a voice channel then try again!');
+            interaction.editReply('Join a voice channel then try again!');
         }
     },
     async stop(interaction) {
@@ -161,74 +207,65 @@ module.exports = {
 
             song_queue.connection.destroy();
             queue.delete(interaction.guild.id)
-            interaction.reply('**Music Stopped!**');
+            interaction.editReply('**Music Stopped!**');
 
         } else {
-            interaction.reply('Join a voice channel then try again!');
+            interaction.editReply('Join a voice channel then try again!');
         }
+    },
+
+    async play_next(interaction, message, serverQueue) {
+        const channel = interaction.member?.voice.channel;
+
+        if (channel) { 
+            try {
+                const songs = await getSongs(interaction, message);
+
+                if (!serverQueue) {
+                    return createContract(interaction, channel, songs)
+
+                } else {
+                    const head = serverQueue.songs[0];
+
+                    serverQueue.songs.shift();
+            
+                    serverQueue.songs = songs.concat(serverQueue.songs);
+            
+                    serverQueue.songs.unshift(head);
+                    console.log("PLAYNEXT___________________________");
+                    console.log(serverQueue.songs);
+                    return interaction.editReply(`${songs[0].title} has been added to the front of the queue!`);
+                }
+                
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            interaction.editReply('Join a voice channel then try again!');
+        }
+
     },
 	async play(interaction, message, serverQueue) {
         const channel = interaction.member?.voice.channel;
 
         if (channel) {
                 try {
-                    // const connection = await connectToChannel(channel);
-                    // connection.subscribe(player);
-                    console.log(message)
-                    // const args = message.split(" ");
-                    // console.log(args)
-                    const songs = []
+                    const songs = await getSongs(interaction, message);
 
-                    if (isPlaylistURL(message)) {
-                        console.log("is playlist url")
-                        // query = {
-                        //     "listId": 
-                        // };
-
-                        const list = await ytSearch( { "listId": message.split('=')[1] } );
-
-                        console.log( 'playlist title: ' + list.title );
-                        list.videos.forEach( function ( video ) {
-                            console.log( video )
-                            console.log("ALEFGASDFHLSADJFIOS")
-                            console.log({ title: video.title, url: idToURL(video.videoId) })
-                            songs.push({ title: video.title, url: idToURL(video.videoId), duration: video.duration.timestamp })
-
-                        } );
-                        
-
-                    } else {
-
-                        if (isSingleVideoURL(message)) {
-                            console.log("video url")
-                            query = {
-                                "videoId": message.split('=')[1]
-                            };
-                            query = message.split('=')[1];
-                        } else {
-                            console.log("word search")
-                            query = message
-                        }
-
-                        const song = await findVideo(query, interaction)
-                        console.log(song)
-                        songs.push(song)
-                    }
-                    
                     if (!serverQueue) {
                         return createContract(interaction, channel, songs)
 
                     } else {
                         serverQueue.songs.concat(songs);
                         console.log(serverQueue.songs);
-                        return interaction.editReply(`${song.title} has been added to the queue!`);
+                        return interaction.editReply(`${songs[0].title} has been added to the queue!`);
                     }
                     
                 } catch (error) {
                     console.error(error);
                 }
             } else {
-                interaction.reply('Join a voice channel then try again!');
+                interaction.editReply('Join a voice channel then try again!');
         }
         
         // return await interaction.reply(message); 
