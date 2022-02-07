@@ -31,9 +31,9 @@ module.exports = {
         console.log(newServerQueue.songs)
         shuffleArray(newServerQueue.songs);
 
-		if (!queueIsEmpty) {
-			await music.skip(interaction);
-		}
+		// if (!queueIsEmpty) {
+		// 	await music.skip(interaction);
+		// }
 		interaction.editReply("just vibes **~** ");
         
 	},
