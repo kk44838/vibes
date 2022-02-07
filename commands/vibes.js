@@ -14,7 +14,8 @@ function shuffleArray(array) {
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('vibes')
-		.setDescription('just vibes'),
+		.setDescription('just vibes')
+        .addBooleanOption(option => option.setName('shuffle').setDescription('Shuffle Playlist')),
 	async execute(interaction) {
         const url = "https://www.youtube.com/playlist?list=PLP16jd6hNkwO4eZoknycQv4ZfSEwtgCX3"
         const serverQueue = music.queue.get(interaction.guild.id);
@@ -28,9 +29,12 @@ module.exports = {
 
         const newServerQueue = music.queue.get(interaction.guild.id);
 
-        console.log(newServerQueue.songs)
-        shuffleArray(newServerQueue.songs);
-
+        const shuffle = interaction.options.getBoolean('shuffle');
+        if (shuffle == undefined || shuffle) {
+            console.log(newServerQueue.songs)
+            shuffleArray(newServerQueue.songs);
+        }
+    
 		// if (!queueIsEmpty) {
 		await music.skip(interaction);
 		// }
