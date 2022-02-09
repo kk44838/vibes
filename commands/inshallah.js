@@ -18,7 +18,7 @@ module.exports = {
 			await music.skip(interaction);
 		}
 		
-		interaction.editReply("SIUUUUUUUUU");
+		await interaction.editReply("SIUUUUUUUUU");
 
 	},
 };

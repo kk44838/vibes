@@ -14,6 +14,6 @@ module.exports = {
 
 		await interaction.deferReply();
         msg =  await music.play_next(interaction, songName, serverQueue);
-		interaction.editReply(msg.msg)
+		await interaction.editReply(msg.msg)
 	},
 };

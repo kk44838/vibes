@@ -9,7 +9,7 @@ module.exports = {
 
 		await interaction.deferReply();
         msg = await music.skip(interaction);
-		interaction.editReply(msg.msg)
+		await interaction.editReply(msg.msg)
 		
 	},
 };

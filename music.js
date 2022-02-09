@@ -135,7 +135,7 @@ async function findVideo(query, interaction) {
         
     } else {
         console.log("Error finding video")
-        interaction.editReply('Error finding video.');
+        // interaction.editReply('Error finding video.');
         throw new Error
     }
 }

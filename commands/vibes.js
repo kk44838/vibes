@@ -15,7 +15,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('vibes')
 		.setDescription('just vibes')
-        .addBooleanOption(option => option.setName('shuffle').setDescription('Shuffle Playlist')),
+        .addBooleanOption(option => option.setName('shuffle').setDescription('Shuffle Playlist').setRequired(true)),
 	async execute(interaction) {
         const url = "https://www.youtube.com/playlist?list=PLP16jd6hNkwO4eZoknycQv4ZfSEwtgCX3"
         const serverQueue = music.queue.get(interaction.guild.id);
@@ -23,9 +23,9 @@ module.exports = {
         await interaction.deferReply();
 
 		queueIsEmpty = serverQueue === undefined || serverQueue.songs.length == 0;
-
+        
         msg =  await music.play_next(interaction, url, serverQueue);
-        console.log("sdgohadflks")
+        // console.log("sdgohadflks")
 
         const newServerQueue = music.queue.get(interaction.guild.id);
 
@@ -35,10 +35,11 @@ module.exports = {
             shuffleArray(newServerQueue.songs);
         }
     
-		// if (!queueIsEmpty) {
-		await music.skip(interaction);
-		// }
-		interaction.editReply("just vibes **~** ");
+		if (!queueIsEmpty) {
+		    await music.skip(interaction);
+		}
+
+		await interaction.editReply("just vibes **~** ");
         
 	},
 };
