@@ -64,7 +64,7 @@ async function createContract(interaction, voiceChannel, songs) {
         
         queueContruct.audioPlayer = audioPlayer
 
-        audioPlayer.on(AudioPlayerStatus.Idle, () => {
+        audioPlayer.on(AudioPlayerStatus.Idle, async () => {
             queueContruct.songs.shift();
             await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
         });
