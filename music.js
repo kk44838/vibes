@@ -66,18 +66,17 @@ async function createContract(interaction, voiceChannel, songs) {
 
         audioPlayer.on(AudioPlayerStatus.Idle, () => {
             queueContruct.songs.shift();
-            play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
+            await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
         });
 
         console.log(queueContruct.songs[0])
 
-        
         return await play_song(interaction, queueContruct.songs[0], connection, audioPlayer);
     } catch (err) {
         // Printing the error message if the bot fails to join the voicechat
         console.log(err);
         queue.delete(interaction.guild.id);
-        return interaction.channel.send(err);
+        return await interaction.channel.send(err);
     }
 }
 
@@ -194,7 +193,7 @@ module.exports = {
 
             if (song_queue) {
                 song_queue.songs.shift();
-                return play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
+                return await play_song(interaction, song_queue.songs[0], song_queue.connection, song_queue.audioPlayer);
             } else {
                 // interaction.editReply('**Nothing to Skip.**');
                 return { "msg": '**Nothing to Skip.**'}
@@ -231,7 +230,7 @@ module.exports = {
                 const songs = await getSongs(interaction, message);
 
                 if (!serverQueue) {
-                    return createContract(interaction, channel, songs)
+                    return await createContract(interaction, channel, songs)
 
                 } else {
                     const head = serverQueue.songs[0];
@@ -265,7 +264,7 @@ module.exports = {
                 const songs = await getSongs(interaction, message);
 
                 if (!serverQueue) {
-                    return createContract(interaction, channel, songs)
+                    return await createContract(interaction, channel, songs)
 
                 } else {
                     serverQueue.songs.concat(songs);
