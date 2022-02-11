@@ -29,7 +29,7 @@ client.on('interactionCreate', async interaction => {
 		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
-		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+		await interaction.editReply({ content: 'There was an error while executing this command!', ephemeral: true });
 	}
 });
 
@@ -68,7 +68,7 @@ async function run() {
       await mongoDBClient.close();
     }
   }
-run().catch(console.dir);
+// run().catch(console.dir);
 
 
 

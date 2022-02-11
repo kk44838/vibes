@@ -92,23 +92,25 @@ const play_song = async (interaction, song, connection, audioPlayer) => {
         return { "msg": '**Music Stopped!**' };
     }
 
+    
+    try {
+        //Create Stream from Youtube URL
+        const stream = await play.stream(song.url)
+        //Create AudioResource from Stream
+        let resource = createAudioResource(stream.stream, {
+            inputType: stream.type
+        })
 
-    //Create Stream from Youtube URL
-    const stream = await play.stream(song.url)
+        //Play resource
+        audioPlayer.play(resource)
 
-    //Create AudioResource from Stream
-    let resource = createAudioResource(stream.stream, {
-        inputType: stream.type
-    })
+        connection.subscribe(audioPlayer)
 
-    //Play resource
-    audioPlayer.play(resource)
-
-    connection.subscribe(audioPlayer)
-
-    // await interaction.editReply(`🎶 Now playing **${song.title}**`)
-    return { "msg": `🎶 Now playing **${song.title}**` };
-
+        // await interaction.editReply(`🎶 Now playing **${song.title}**`)
+        return { "msg": `🎶 Now playing **${song.title}**` };
+    } catch (err) {
+        return module.exports.skip(interaction);
+    }
 }
 
 
@@ -230,7 +232,7 @@ module.exports = {
                 const songs = await getSongs(interaction, message);
 
                 if (!serverQueue) {
-                    return await createContract(interaction, channel, songs)
+                    return await createContract(interaction, channel, JSON.parse(JSON.stringify(songs)))
 
                 } else {
                     const head = serverQueue.songs[0];
@@ -264,7 +266,7 @@ module.exports = {
                 const songs = await getSongs(interaction, message);
 
                 if (!serverQueue) {
-                    return await createContract(interaction, channel, songs)
+                    return await createContract(interaction, channel, JSON.parse(JSON.stringify(songs)))
 
                 } else {
                     serverQueue.songs.concat(songs);
